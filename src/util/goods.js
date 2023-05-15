@@ -11,6 +11,7 @@ const goods = Mock.mock({
           title: "麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排",
           price: '@integer(2, 10)',
           id:"@id()",
+          count: 0
         }
       ]
     }

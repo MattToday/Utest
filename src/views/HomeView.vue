@@ -9,9 +9,8 @@
       </div>
       <!-- goods -->
       <!-- <sticky :offset-top="44" @change="goodsInnerFixedHanndle"> -->
-        <div class="space" v-if="isCanScroll"></div>
-        <div class="goods-wrapper" ref="goodsWrapper" :class="{canScroll: isCanScroll}">
-          <div class="menu-wrapper scroll" ref="menuWrapper">
+        <div class="goods-wrapper" ref="goodsWrapper">
+          <div class="menu-wrapper" ref="menuWrapper" :class="isCanScroll? 'scroll' : 'fixedP'" >
             <ul>
               <li
                 class="menu-item"
@@ -24,7 +23,7 @@
               </li>
             </ul>
           </div>
-          <div class="foods-wrapper scroll" ref="foodWrapper" @scroll="foodsScrollHandle">
+          <div class="foods-wrapper" ref="foodWrapper" @scroll="foodsScrollHandle" :class="isCanScroll? 'scroll' : 'fixedP'">
             <div>
               <div class="food-list-hook" v-for="classify in goods.class" :key="classify.id">
                 <div class="good-card" v-for="good in classify.goods" :key="good.id">
@@ -34,7 +33,7 @@
                     <div class="good-control">
                       <div class="left">参考价 <i>¥</i><span>{{ good.price }}</span></div>
                       <div class="right">
-                        <zp-stepper></zp-stepper>
+                        <zp-stepper :selectNum.sync="good.count"></zp-stepper>
                       </div>
                     </div>
                   </div>
@@ -45,16 +44,19 @@
         </div>
       <!-- </sticky> -->
     </div>
+    <shopping-cart :num="shoppingCartNum"></shopping-cart>
   </div>
 </template>
 
 <script>
+  // import { Sticky } from 'vant';
   import BScroll from '@better-scroll/core'
   import goods from '../util/goods'
   import ZpHeader from '@/components/ZpHeader.vue'
   import ZpHint from '@/components/ZpHint.vue'
   import ShopInfo from '@/components/ShopInfo.vue'
   import ZpStepper from '@/components/ZpStepper.vue';
+  import ShoppingCart from '@/components/ShoppingCart.vue'
   export default {
     data(){
       return {
@@ -63,13 +65,15 @@
         goodsScrollTop: 0,
         menuHeightArr: [],
         listHeightArr: [],
+        foodScollPos: 0,
+        fixed: false
       }
     },
     created() {
       console.log(this.goods)
     },
 
-    components: { ZpHeader, ZpHint, ShopInfo, ZpStepper },
+    components: { ZpHeader, ZpHint, ShopInfo, ZpStepper, ShoppingCart },
 
     computed: {
       currentIndex() {
@@ -82,24 +86,28 @@
           }
         }
         return 0
+      },
+      shoppingCartNum() {
+        let num = 0
+        this.goods.class.forEach((classType) => {
+          classType.goods.forEach(good => {
+            num += good.count
+          });
+        })
+        return num
       }
     },
     watch:{
       currentIndex(index) {
-        // const menus = this.$refs.menuWrapper.getElementsByClassName('menu-item')
-        // const selectMenu = menus[index]
-        console.log(this.menuHeightArr[index + 1]);
-        const menuScrollTop = this.$refs.menuWrapper.scrollTop
+        const menuScrollTop = Math.abs(Math.round(this.menuScroll.y))
         const menuClientHeight = this.$refs.menuWrapper.clientHeight
-        console.log(menuScrollTop);
         const diff = this.menuHeightArr[index + 1] - menuScrollTop - menuClientHeight
         if (diff > 0) {
-          this.$refs.menuWrapper.scrollTo(0, menuScrollTop + diff)
-          console.log(1);
+          this.menuScroll.scrollTo(0, this.menuScroll.y-diff, 500)
         }
 
         if (this.menuHeightArr[index] < menuScrollTop) {
-          this.$refs.menuWrapper.scrollTo(0, this.menuHeightArr[index])
+          this.menuScroll.scrollTo(0, -this.menuHeightArr[index], 500)
         }
 
       }
@@ -118,6 +126,7 @@
       },
       goodsInnerFixedHanndle(fixed) {
         console.log(fixed)
+        this.fixed = fixed
       },
       computedMenuOffsetTop() {
         const menus = this.$refs.menuWrapper.getElementsByClassName('menu-item')
@@ -130,7 +139,7 @@
         }
       },
       computedListOffsetTop() {
-         const menus = this.$refs.foodWrapper.getElementsByClassName('food-list-hook')
+        const menus = this.$refs.foodWrapper.getElementsByClassName('food-list-hook')
         let height = 0
         this.listHeightArr.push(height)
         for (let i = 0; i < menus.length; i++) {
@@ -146,23 +155,29 @@
       windowScrollHandle() {
         const goodsWrapperOffsetTop = this.$refs.goodsWrapper.offsetTop
         this.scrollTop =  document.documentElement.scrollTop
-        // if (this.isCanScroll && this.scrollTop > scrollTop) {
-        //   console.log(1);
-        //   this.menuScroll && this.menuScroll.destroy()
-        //   this.foodScroll && this.foodScroll.destroy()
-        //   this.isCanScroll = false
-        //   return
-        // } else {
-        //   this.scrollTop = scrollTop
-        // }
         if (this.scrollTop >= goodsWrapperOffsetTop - 44) {
           this.top = goodsWrapperOffsetTop - 44
           this.isCanScroll = true
           this.$nextTick(() => {
             this.menuScroll=new BScroll(this.$refs.menuWrapper, { click: true })
-            this.foodScroll=new BScroll(this.$refs.foodWrapper, {click: true, probeType: 3, eventPassthrough: 'vertical'})
+            this.foodScroll=new BScroll(this.$refs.foodWrapper, {click: true, probeType: 3, bounce: {top: false}})
+            this.foodScroll.on('scroll', (pos) => {
+              if (pos.y === 0 && this.foodScroll.movingDirectionY === -1) {
+                this.destroyScroll()
+              }
+              this.foodScollPos = pos.y
+              this.goodsScrollTop = Math.abs(Math.round(pos.y))
+              // console.log(Math.abs(parseInt(pos.y)));
+            })
           })
+        } else {
+          this.isCanScroll = false
+          this.destroyScroll();
         }
+      },
+      destroyScroll() {
+        this.menuScroll && this.menuScroll.destroy()
+        this.foodScroll && this.foodScroll.destroy()
       },
 
       menuClickHandle(index) {
@@ -193,29 +208,23 @@
     }
   }
 
-  .goods-wrapper {
-    &.canScroll {
-      position: fixed;
-      top: 44px;
-      left: 0;
-      right: 0;
-      bottom: 0;
-    }
-  }
   .space {
     height: calc(100vh - 44px);
   }
   .scroll {
-    position: relative;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     &::-webkit-scrollbar {
       display: none;
     }
   }
+  .fixedP {
+    overflow-y: hidden;
+  }
 
   .goods-wrapper {
     display: flex;
+    height: calc(100vh - 44px);
     .menu-wrapper {
       width: 0.78rem;
       li {
