@@ -49,6 +49,7 @@
 </template>
 
 <script>
+  import BScroll from '@better-scroll/core'
   import goods from '../util/goods'
   import ZpHeader from '@/components/ZpHeader.vue'
   import ZpHint from '@/components/ZpHint.vue'
@@ -144,11 +145,23 @@
       },
       windowScrollHandle() {
         const goodsWrapperOffsetTop = this.$refs.goodsWrapper.offsetTop
-        const scrollTop =  document.documentElement.scrollTop
-        if (scrollTop >= goodsWrapperOffsetTop - 44) {
+        this.scrollTop =  document.documentElement.scrollTop
+        // if (this.isCanScroll && this.scrollTop > scrollTop) {
+        //   console.log(1);
+        //   this.menuScroll && this.menuScroll.destroy()
+        //   this.foodScroll && this.foodScroll.destroy()
+        //   this.isCanScroll = false
+        //   return
+        // } else {
+        //   this.scrollTop = scrollTop
+        // }
+        if (this.scrollTop >= goodsWrapperOffsetTop - 44) {
+          this.top = goodsWrapperOffsetTop - 44
           this.isCanScroll = true
-        } else {
-          this.isCanScroll = false
+          this.$nextTick(() => {
+            this.menuScroll=new BScroll(this.$refs.menuWrapper, { click: true })
+            this.foodScroll=new BScroll(this.$refs.foodWrapper, {click: true, probeType: 3, eventPassthrough: 'vertical'})
+          })
         }
       },
 
