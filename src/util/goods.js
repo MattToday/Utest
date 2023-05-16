@@ -8,7 +8,7 @@ const goods = Mock.mock({
       name: "@cword(4, 8)",
       "goods|4-8": [
         {
-          title: "麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排",
+          title: "@cword(12, 28)",
           price: '@integer(2, 18)',
           id:"@id()",
           count: 0

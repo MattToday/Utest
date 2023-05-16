@@ -97,7 +97,7 @@
       currentIndex(index) {
         const menuScrollTop = Math.abs(Math.round(this.menuScroll.y))
         const menuClientHeight = this.$refs.menuWrapper.clientHeight
-        const diff = this.menuHeightArr[index + 1] - menuScrollTop - menuClientHeight
+        const diff = this.menuHeightArr[index + 1] - menuScrollTop - menuClientHeight + 74
         // 商品向下滚动切换分类后对应的导航菜单如需滚动则滚动
         if (diff > 0) {
           this.menuScroll.scrollTo(0, this.menuScroll.y-diff, 500)
