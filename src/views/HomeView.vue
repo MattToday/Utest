@@ -14,7 +14,7 @@
       <!-- 页面下半部分商品展示 -->
       <div class="goods-wrapper" ref="goodsWrapper">
         <!-- 商品导航 -->
-        <div class="menu-wrapper" ref="menuWrapper" :class="isCanScroll? 'scroll' : 'fixedP'" >
+        <div class="menu-wrapper" ref="menuWrapper" >
           <ul class="scroll-inner">
             <li
               class="menu-item"
@@ -29,7 +29,7 @@
           </ul>
         </div>
         <!-- 商品列表 -->
-        <div class="foods-wrapper " ref="foodWrapper" :class="isCanScroll? 'scroll' : 'fixedP'">
+        <div class="foods-wrapper " ref="foodWrapper">
           <div class="scroll-inner">
             <div class="food-list-hook" v-for="classify in goods.class" :key="classify.id">
               <div class="good-card" v-for="good in classify.goods" :key="good.id">
@@ -248,6 +248,8 @@
     .menu-wrapper {
       width: 0.78rem;
       background-color: #F5F5F5;
+      overflow: hidden;
+      height: 100%;
       li {
         padding: 0.16rem 0.1rem;
         color: #999;
@@ -266,6 +268,8 @@
       }
     }
     .foods-wrapper {
+      overflow: hidden;
+      height: 100%;
       flex: 1;
     }
   }
