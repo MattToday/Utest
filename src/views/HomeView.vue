@@ -177,7 +177,7 @@
           this.isCanScroll = true
           this.$nextTick(() => {
             this.menuScroll=new BScroll(this.$refs.menuWrapper, { click: true })
-            this.foodScroll=new BScroll(this.$refs.foodWrapper, {click: true, probeType: 3, bounce: {top: false}, useTransition: false})
+            this.foodScroll=new BScroll(this.$refs.foodWrapper, {click: true, probeType: 3, bounce: {top: false}})
             this.foodScroll.on('scroll', (pos) => {
               if (pos.y === 0 && this.foodScroll.movingDirectionY === -1) {
                 this.destroyScroll()

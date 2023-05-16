@@ -6,10 +6,10 @@ const goods = Mock.mock({
     {
       id:"@id()",
       name: "@cword(4, 8)",
-      "goods|7-14": [
+      "goods|4-8": [
         {
           title: "麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排麻辣鸡排",
-          price: '@integer(2, 10)',
+          price: '@integer(2, 18)',
           id:"@id()",
           count: 0
         }
