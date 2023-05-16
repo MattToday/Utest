@@ -1,3 +1,5 @@
+<!-- 商品数量步进器 -->
+
 <template>
   <div class="stepper-wrapper">
     <div class="have-add-cart" v-if="selectNum">
@@ -38,39 +40,42 @@
     },
     props: ['selectNum'],
     methods: {
+      // 增加商品
       addGood() {
         this.$emit('update:selectNum', this.selectNum + 1)
         this.ballFlag = true
       },
+      // 减少商品
       subGood() {
         this.$emit('update:selectNum', this.selectNum - 1)
       },
 
-      beforeEnter(e) {
-        console.log(e);
+      // 抛物线球运动前钩子
+      beforeEnter() {
+        // 初始化小球状态
+        this.$refs.ballInner.style.transition = ''
+        this.$refs.ball.style.transition = ''
+        this.$refs.ball.style.transform = `translate(0, 0)`
+        this.$refs.ballInner.style.transform = `translate(0, 0)`
       },
+      // 抛物线球运动时钩子
       enter(el, done) {
+        // 根据小球位置和页面底部购物盒位置计算移动位置
+        // 通过分别控制两个dom的横向和纵向运动达到抛物线效果
         const ballPosition = this.$refs.ball.getBoundingClientRect()
         const badgePosition = document.getElementById('target').getBoundingClientRect()
-        console.log(ballPosition);
-        console.log(badgePosition);
         const xDist = badgePosition.left - ballPosition.left
         const yDist = badgePosition.top - ballPosition.top
         el.style.transform = `translate(${xDist}px, 0)`
-        el.style.transition = 'all 0.5s linear'
+        el.style.transition = 'all 0.3s linear'
 
         this.$refs.ballInner.style.transform = `translate(0, ${yDist}px)`
-        this.$refs.ballInner.style.transition = 'all 0.5s ease-in'
+        this.$refs.ballInner.style.transition = 'all 0.3s ease-in'
         done()
       },
+      // 抛物线球运动后钩子
       afterEnter() {
         this.ballFlag = false
-        setTimeout(() => {
-          this.$refs.ballInner.style.transition = ''
-          this.$refs.ball.style.transition = ''
-          this.$refs.ball.style.transform = `translate(0, 0)`
-          this.$refs.ballInner.style.transform = `translate(0, 0)`
-        }, 1000)
       }
     }
   }

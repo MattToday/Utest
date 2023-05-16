@@ -1,40 +1,45 @@
 <template>
   <div class="home-view">
+    <!-- 标题 -->
     <zp-header></zp-header>
     <div class="container">
+      <!-- 提示 -->
       <zp-hint></zp-hint>
+      <!-- 店铺信息 -->
       <shop-info></shop-info>
-      <div class="tip" ref="test">
+      <!-- 购买流程 -->
+      <div class="tip">
         <img src="../assets/image/tip.png" alt="">
       </div>
-      <!-- goods -->
-      <!-- <sticky :offset-top="44" @change="goodsInnerFixedHanndle"> -->
-        <div class="goods-wrapper" ref="goodsWrapper">
-          <div class="menu-wrapper" ref="menuWrapper" :class="isCanScroll? 'scroll' : 'fixedP'" >
-            <ul>
-              <li
-                class="menu-item"
-                v-for="(classify, index) in goods.class"
-                :key="classify.id"
-                :class="{active: currentIndex === index}"
-                @click="menuClickHandle(index)"
-              >
-                <span>{{classify.name}}</span>
-              </li>
-            </ul>
-          </div>
-          <div class="foods-wrapper" ref="foodWrapper" @scroll="foodsScrollHandle" :class="isCanScroll? 'scroll' : 'fixedP'">
-            <div>
-              <div class="food-list-hook" v-for="classify in goods.class" :key="classify.id">
-                <div class="good-card" v-for="good in classify.goods" :key="good.id">
-                  <img src="../assets/image/default2.jpg" alt="" />
-                  <div class="good-info">
-                    <h5>{{ good.title}}</h5>
-                    <div class="good-control">
-                      <div class="left">参考价 <i>¥</i><span>{{ good.price }}</span></div>
-                      <div class="right">
-                        <zp-stepper :selectNum.sync="good.count"></zp-stepper>
-                      </div>
+      <!-- 页面下半部分商品展示 -->
+      <div class="goods-wrapper" ref="goodsWrapper">
+        <!-- 商品导航 -->
+        <div class="menu-wrapper" ref="menuWrapper" :class="isCanScroll? 'scroll' : 'fixedP'" >
+          <ul>
+            <li
+              class="menu-item"
+              v-for="(classify, index) in goods.class"
+              :key="classify.id"
+              :class="{active: currentIndex === index}"
+              @click="menuClickHandle(index)"
+            >
+              <span>{{classify.name}}</span>
+              <badge v-if="classify.count" :content="classify.count" color="#FA5150" />
+            </li>
+          </ul>
+        </div>
+        <!-- 商品列表 -->
+        <div class="foods-wrapper" ref="foodWrapper" :class="isCanScroll? 'scroll' : 'fixedP'">
+          <div>
+            <div class="food-list-hook" v-for="classify in goods.class" :key="classify.id">
+              <div class="good-card" v-for="good in classify.goods" :key="good.id">
+                <img src="../assets/image/default.png" alt="" />
+                <div class="good-info">
+                  <h5>{{ good.title}}</h5>
+                  <div class="good-control">
+                    <div class="left">参考价 <i>¥</i><span>{{ good.price }}</span></div>
+                    <div class="right">
+                      <zp-stepper :selectNum.sync="good.count"></zp-stepper>
                     </div>
                   </div>
                 </div>
@@ -42,15 +47,17 @@
             </div>
           </div>
         </div>
-      <!-- </sticky> -->
+      </div>
     </div>
-    <shopping-cart :num="shoppingCartNum"></shopping-cart>
+    <!-- 底部购物车 -->
+    <shopping-cart :shoppingCartData="shoppingCartData" :num="shoppingCartNum"></shopping-cart>
   </div>
 </template>
 
 <script>
   // import { Sticky } from 'vant';
   import BScroll from '@better-scroll/core'
+  import { Badge } from 'vant';
   import goods from '../util/goods'
   import ZpHeader from '@/components/ZpHeader.vue'
   import ZpHint from '@/components/ZpHint.vue'
@@ -60,22 +67,20 @@
   export default {
     data(){
       return {
-        goods,
-        isCanScroll: false,
-        goodsScrollTop: 0,
-        menuHeightArr: [],
-        listHeightArr: [],
-        foodScollPos: 0,
-        fixed: false
+        goods, // 商品数据，随机生成
+        isCanScroll: false, // 控制商品未吸顶时禁止滚动
+        goodsScrollTop: 0, //商品列表滚动距离
+        menuHeightArr: [], // 商品导航菜单每个子菜单距离顶部高度
+        listHeightArr: [], // 商品列表每个分类距离顶部高度
+        shoppingCartData: [], // 购物车数据
+        shoppingCartNum: 0, // 已加入购物车买数量
       }
     },
-    created() {
-      console.log(this.goods)
-    },
 
-    components: { ZpHeader, ZpHint, ShopInfo, ZpStepper, ShoppingCart },
+    components: { ZpHeader, ZpHint, ShopInfo, ZpStepper, ShoppingCart, Badge },
 
     computed: {
+      // 商品列表滚动后所对应的商品分类下标
       currentIndex() {
         const { goodsScrollTop } = this
         for (let i = 0; i < this.listHeightArr.length; i++) {
@@ -87,29 +92,44 @@
         }
         return 0
       },
-      shoppingCartNum() {
-        let num = 0
-        this.goods.class.forEach((classType) => {
-          classType.goods.forEach(good => {
-            num += good.count
-          });
-        })
-        return num
-      }
     },
     watch:{
       currentIndex(index) {
         const menuScrollTop = Math.abs(Math.round(this.menuScroll.y))
         const menuClientHeight = this.$refs.menuWrapper.clientHeight
         const diff = this.menuHeightArr[index + 1] - menuScrollTop - menuClientHeight
+        // 商品向下滚动切换分类后对应的导航菜单如需滚动则滚动
         if (diff > 0) {
           this.menuScroll.scrollTo(0, this.menuScroll.y-diff, 500)
         }
-
+        // 商品向上滚动切换分类后对应的导航菜单如需滚动则滚动
         if (this.menuHeightArr[index] < menuScrollTop) {
           this.menuScroll.scrollTo(0, -this.menuHeightArr[index], 500)
         }
-
+      },
+      goods: {
+        handler() {
+          // 计算已加入购物车的总数，同时计算每个分类已加入购物车的数量
+          this.shoppingCartNum = 0
+          this.goods.class.map((goodsClass) => {
+            let classCount = 0
+            goodsClass.goods.forEach(good => {
+              classCount += good.count
+              this.shoppingCartNum += good.count
+            });
+            goodsClass.count = classCount
+          })
+          // 筛选购物车已选商品
+          let goodsArray = []
+          this.goods.class.forEach(goodsClass => {
+            const selectGoods = goodsClass.goods.filter(good => {
+              return good.count > 0
+            })
+            goodsArray = goodsArray.concat(selectGoods)
+          });
+          this.shoppingCartData = goodsArray
+        },
+        deep: true
       }
     },
     mounted() {
@@ -119,15 +139,13 @@
       init() {
         // 监听window滚动，用来控制商品区域是否开启滚动
         window.addEventListener('scroll', this.windowScrollHandle, true)
+        // 计算导航菜单和商品列表商品分类距离顶部的高度
         setTimeout(() => {
           this.computedMenuOffsetTop()
           this.computedListOffsetTop()
         }, 500)
       },
-      goodsInnerFixedHanndle(fixed) {
-        console.log(fixed)
-        this.fixed = fixed
-      },
+      // 计算每个导航菜单距离顶部的高度
       computedMenuOffsetTop() {
         const menus = this.$refs.menuWrapper.getElementsByClassName('menu-item')
         let height = 0
@@ -138,6 +156,7 @@
           this.menuHeightArr.push(height)
         }
       },
+      // 计算每个商品分类距离顶部的高度
       computedListOffsetTop() {
         const menus = this.$refs.foodWrapper.getElementsByClassName('food-list-hook')
         let height = 0
@@ -149,9 +168,7 @@
         }
         console.log(this.listHeightArr);
       },
-      foodsScrollHandle() {
-        this.goodsScrollTop = this.$refs.foodWrapper.scrollTop
-      },
+      // 监听window滚动，用来控制商品区域是否开启滚动，同时定义和销毁商品列表和导航列表的滚动
       windowScrollHandle() {
         const goodsWrapperOffsetTop = this.$refs.goodsWrapper.offsetTop
         this.scrollTop =  document.documentElement.scrollTop
@@ -160,14 +177,12 @@
           this.isCanScroll = true
           this.$nextTick(() => {
             this.menuScroll=new BScroll(this.$refs.menuWrapper, { click: true })
-            this.foodScroll=new BScroll(this.$refs.foodWrapper, {click: true, probeType: 3, bounce: {top: false}})
+            this.foodScroll=new BScroll(this.$refs.foodWrapper, {click: true, probeType: 3, bounce: {top: false}, useTransition: false})
             this.foodScroll.on('scroll', (pos) => {
               if (pos.y === 0 && this.foodScroll.movingDirectionY === -1) {
                 this.destroyScroll()
               }
-              this.foodScollPos = pos.y
               this.goodsScrollTop = Math.abs(Math.round(pos.y))
-              // console.log(Math.abs(parseInt(pos.y)));
             })
           })
         } else {
@@ -179,11 +194,14 @@
         this.menuScroll && this.menuScroll.destroy()
         this.foodScroll && this.foodScroll.destroy()
       },
-
+      
+      // 商品菜单点击事件
       menuClickHandle(index) {
-        console.log(index);
+        if (!this.isCanScroll) {
+          return
+        }
         const scrollTop = this.listHeightArr[index]
-        this.$refs.foodWrapper.scrollTo(0, scrollTop)
+        this.foodScroll.scrollTo(0, -scrollTop)
       }
     },
     beforeDestroy() {
@@ -233,10 +251,16 @@
         font-size: 0.12rem;
         font-weight: 700;
         background-color: #F5F5F5;
+        position: relative;
         &.active {
           background-color: #fff;
           color: #333;
         }
+      }
+      .van-badge {
+        position: absolute;
+        right: 0.02rem;
+        top: 0.07rem;
       }
     }
     .foods-wrapper {
@@ -289,4 +313,5 @@
       }
     }
   }
+
 </style>

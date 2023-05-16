@@ -1,3 +1,5 @@
+<!-- 店铺信息展示 -->
+
 <template>
   <div class="shop-info">
     <div class="shop-message-wrap">
@@ -9,7 +11,7 @@
         </p>
       </div>
       <div class="right">
-        <img src="../assets/image/default.jpg" alt="">
+        <img src="../assets/image/default.png" alt="">
       </div>
     </div>
     <div class="shop-hint">

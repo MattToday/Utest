@@ -1,3 +1,5 @@
+<!-- 商品卡片展示 -->
+
 <template>
   <div class="good-card">
     <img src="../assets/image/default2.jpg" alt="" />

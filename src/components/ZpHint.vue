@@ -1,3 +1,5 @@
+<!-- 提示信息 -->
+
 <template>
   <div class="hint" v-if="show">
     <p>商品均由UU跑腿提供帮买服务，一切商业行为与该品无关</p>
