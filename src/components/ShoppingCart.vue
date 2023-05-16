@@ -219,6 +219,14 @@
       color: #666;
       font-size: 0.13rem;
     }
+    .goods-list {
+      max-height: 3rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
     li {
       padding: 0.08rem 0;
       display: flex;

@@ -15,7 +15,7 @@
       <div class="goods-wrapper" ref="goodsWrapper">
         <!-- 商品导航 -->
         <div class="menu-wrapper" ref="menuWrapper" :class="isCanScroll? 'scroll' : 'fixedP'" >
-          <ul>
+          <ul class="scroll-inner">
             <li
               class="menu-item"
               v-for="(classify, index) in goods.class"
@@ -29,8 +29,8 @@
           </ul>
         </div>
         <!-- 商品列表 -->
-        <div class="foods-wrapper" ref="foodWrapper" :class="isCanScroll? 'scroll' : 'fixedP'">
-          <div>
+        <div class="foods-wrapper " ref="foodWrapper" :class="isCanScroll? 'scroll' : 'fixedP'">
+          <div class="scroll-inner">
             <div class="food-list-hook" v-for="classify in goods.class" :key="classify.id">
               <div class="good-card" v-for="good in classify.goods" :key="good.id">
                 <img src="../assets/image/default.png" alt="" />
@@ -166,7 +166,6 @@
           height = menu.clientHeight + height
           this.listHeightArr.push(height)
         }
-        console.log(this.listHeightArr);
       },
       // 监听window滚动，用来控制商品区域是否开启滚动，同时定义和销毁商品列表和导航列表的滚动
       windowScrollHandle() {
@@ -243,14 +242,17 @@
   .goods-wrapper {
     display: flex;
     height: calc(100vh - 44px);
+    .scroll-inner {
+      padding-bottom: 0.74rem;
+    }
     .menu-wrapper {
       width: 0.78rem;
+      background-color: #F5F5F5;
       li {
         padding: 0.16rem 0.1rem;
         color: #999;
         font-size: 0.12rem;
         font-weight: 700;
-        background-color: #F5F5F5;
         position: relative;
         &.active {
           background-color: #fff;
@@ -271,6 +273,7 @@
   .good-card {
     padding: 0.1rem;
     display: flex;
+    pointer-events: auto;
     img {
       width: 0.95rem;
       height: 0.95rem;
